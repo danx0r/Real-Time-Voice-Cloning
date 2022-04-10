@@ -34,6 +34,10 @@ if __name__ == '__main__':
         "If True, audio won't be played.")
     parser.add_argument("--seed", type=int, default=None, help=\
         "Optional random number seed value to make toolbox deterministic.")
+    parser.add_argument("--clone", help=\
+        "file with 5-second sample of voice to clone to")
+    parser.add_argument("--text", help=\
+        "text to speak in clone voice")
     args = parser.parse_args()
     arg_dict = vars(args)
     print_args(args, parser)
@@ -118,12 +122,14 @@ if __name__ == '__main__':
 
     print("Interactive generation loop")
     num_generated = 0
-    while True:
+#     while True:
+    if True:
         try:
             # Get the reference audio filepath
             message = "Reference voice: enter an audio filepath of a voice to be cloned (mp3, " \
                       "wav, m4a, flac, ...):\n"
-            in_fpath = Path(input(message).replace("\"", "").replace("\'", ""))
+#             in_fpath = Path(input(message).replace("\"", "").replace("\'", ""))
+            in_fpath = args.clone
 
             ## Computing the embedding
             # First, we load the wav using the function that the speaker encoder provides. This is
@@ -145,7 +151,8 @@ if __name__ == '__main__':
 
 
             ## Generating the spectrogram
-            text = input("Write a sentence (+-20 words) to be synthesized:\n")
+#             text = input("Write a sentence (+-20 words) to be synthesized:\n")
+            text = args.text
 
             # If seed is specified, reset torch seed and force synthesizer reload
             if args.seed is not None:
@@ -196,7 +203,7 @@ if __name__ == '__main__':
                     raise
 
             # Save it on the disk
-            filename = "demo_output_%02d.wav" % num_generated
+            filename = f"{in_fpath[:-4]}_clone.wav"
             print(generated_wav.dtype)
             sf.write(filename, generated_wav.astype(np.float32), synthesizer.sample_rate)
             num_generated += 1

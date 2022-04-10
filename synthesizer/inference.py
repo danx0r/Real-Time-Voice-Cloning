@@ -86,7 +86,9 @@ class Synthesizer:
             self.load()
 
         # Preprocess text inputs
+        print ("DEBUGa", texts)
         inputs = [text_to_sequence(text.strip(), hparams.tts_cleaner_names) for text in texts]
+        print ("DEBUGb", inputs)
         if not isinstance(embeddings, list):
             embeddings = [embeddings]
 
@@ -98,6 +100,7 @@ class Synthesizer:
 
         specs = []
         for i, batch in enumerate(batched_inputs, 1):
+            print ("DEBUG0", batch)
             if self.verbose:
                 print(f"\n| Generating {i}/{len(batched_inputs)}")
 
@@ -105,13 +108,16 @@ class Synthesizer:
             text_lens = [len(text) for text in batch]
             max_text_len = max(text_lens)
             chars = [pad1d(text, max_text_len) for text in batch]
+            print ("DEBUG1", chars)
             chars = np.stack(chars)
+            print ("DEBUG2", chars)
 
             # Stack speaker embeddings into 2D array for batch processing
             speaker_embeds = np.stack(batched_embeds[i-1])
 
             # Convert to tensor
             chars = torch.tensor(chars).long().to(self.device)
+            print ("DEBUG3", chars)
             speaker_embeddings = torch.tensor(speaker_embeds).float().to(self.device)
 
             # Inference
